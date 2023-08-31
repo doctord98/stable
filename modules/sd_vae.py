@@ -107,6 +107,7 @@ def refresh_vae_list():
 
 
 def find_vae_near_checkpoint(checkpoint_file):
+    refresh_vae_list()
     checkpoint_path = os.path.basename(checkpoint_file).rsplit('.', 1)[0]
     for vae_file in vae_dict.values():
         if os.path.basename(vae_file).startswith(checkpoint_path):
@@ -130,6 +131,7 @@ def is_automatic():
 
 
 def resolve_vae_from_setting() -> VaeResolution:
+    refresh_vae_list()
     if shared.opts.sd_vae == "None":
         return VaeResolution()
 
@@ -144,6 +146,7 @@ def resolve_vae_from_setting() -> VaeResolution:
 
 
 def resolve_vae_from_user_metadata(checkpoint_file) -> VaeResolution:
+    refresh_vae_list()
     metadata = extra_networks.get_user_metadata(checkpoint_file)
     vae_metadata = metadata.get("vae", None)
     if vae_metadata is not None and vae_metadata != "Automatic":
@@ -158,6 +161,7 @@ def resolve_vae_from_user_metadata(checkpoint_file) -> VaeResolution:
 
 
 def resolve_vae_near_checkpoint(checkpoint_file) -> VaeResolution:
+    refresh_vae_list()
     vae_near_checkpoint = find_vae_near_checkpoint(checkpoint_file)
     if vae_near_checkpoint is not None and (not shared.opts.sd_vae_overrides_per_model_preferences or is_automatic()):
         return VaeResolution(vae_near_checkpoint, 'found near the checkpoint')
@@ -166,6 +170,7 @@ def resolve_vae_near_checkpoint(checkpoint_file) -> VaeResolution:
 
 
 def resolve_vae(checkpoint_file) -> VaeResolution:
+    refresh_vae_list()
     if shared.cmd_opts.vae_path is not None:
         return VaeResolution(shared.cmd_opts.vae_path, 'from commandline argument')
 
@@ -186,6 +191,7 @@ def resolve_vae(checkpoint_file) -> VaeResolution:
 
 
 def load_vae_dict(filename, map_location):
+    refresh_vae_list()
     vae_ckpt = sd_models.read_state_dict(filename, map_location=map_location)
     vae_dict_1 = {k: v for k, v in vae_ckpt.items() if k[0:4] != "loss" and k not in vae_ignore_keys}
     return vae_dict_1
